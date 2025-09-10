@@ -54,7 +54,7 @@ class CFG:
     """
     project_name: str = "SignLanguage Project"
     experiment_name: str = "Lightning CNN"
-    test_size: float = 0.2
+    test_size: float = 0.25
     seed: int = 127
     batch_size: int = 512
     max_epochs: int = 30

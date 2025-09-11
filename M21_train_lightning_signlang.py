@@ -505,6 +505,14 @@ def run_training(args, datamodule: SignLanguageDataModule):
     trainer.save_checkpoint(str(ckpt_path))
     print(f"Модель сохранена: {ckpt_path}")
 
+    # ===================== Инференс на одном примере =====================
+    test_loader = dm.test_dataloader()
+    imgs, labels = next(iter(test_loader))
+    model.eval()
+    with torch.no_grad():
+        preds = torch.argmax(model(imgs), dim=1)
+    print(f"Пример инференса: true={labels[0]}, pred={preds[0]}")
+
     # ===================== Визуализация кривых обучения =====================
     metrics = pd.read_csv(csv_logger.log_dir + "/metrics.csv")
 

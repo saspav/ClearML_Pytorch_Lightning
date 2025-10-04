@@ -18,15 +18,15 @@
 │       │                       └── metrics.csv  
 │       └── inference_results.csv  
 └── src                         # Модули для обучения и предсказания  
-        ├── __init__.py  
-        ├── .env                    # Файл с переменными окружения  
-        ├── requirements.txt        # Файл с необходимыми библиотеками  
-        ├── custom_classes.py       # Вспомогательные классы и модули  
-        ├── make_dataset.py         # Подготовка датасета  
-        ├── predict.py              # Предсказания модели  
-        ├── print_time.py           # Замер времени выполнения  
-        ├── set_all_seeds.py        # Установка сидов  
-        └── train.py                # Обучение модели  
+                ├── __init__.py  
+                ├── .env                    # Файл с переменными окружения  
+                ├── requirements.txt        # Файл с необходимыми библиотеками  
+                ├── custom_classes.py       # Вспомогательные классы и модули  
+                ├── make_dataset.py         # Подготовка датасета  
+                ├── predict.py              # Предсказания модели  
+                ├── print_time.py           # Замер времени выполнения  
+                ├── set_all_seeds.py        # Установка сидов  
+                └── train.py                # Обучение модели  
  
 0. Установите пакеты: pip install -r requirements.txt
 

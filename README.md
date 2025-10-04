@@ -16,3 +16,5 @@
    - fast_dev_run - выполнить Тестовый прогон
    - load_dataset - загрузить датасет из [репо](https://github.com/a-milenkin/ml_instruments/raw/refs/heads/main/data) 
    - inference_test - выполнить предсказания на всем тестовом датасете
+
+4. ./task_4 - - решение [задачи](https://stepik.org/lesson/1566829/step/2?unit=1587878)

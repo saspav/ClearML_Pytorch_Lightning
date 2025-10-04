@@ -1,32 +1,36 @@
 # 🤖 Финальный проект по ClearML и Pytorch Lightning ⚡ https://stepik.org/lesson/1566829/step/2?unit=1587878
 
 Структура проекта:  
-.  
-├── README.md      		# этот файл  
-├── data  
-│       ├── images     		# снимки для обучения и валидации  
-│       ├── test_png   		# тестовые снимки для инференса модели  
-├── docs           		# документация к датасету  
-├── models         		# сохраненные модели  
-│       └── best_model.ckpt	# веса модели  
-├── notebooks  
-│       └── EDA.ipynb  		# исследование датасета  
-├── reports        		# отчеты обучения модели  
-│       ├── experiment  
-│       │           └── version_0  
-│       │                       ├── hparams.yaml  
-│       │                       └── metrics.csv  
-│       └── inference_results.csv  
-└── src                         # Модули для обучения и предсказания  
-                ├── __init__.py  
-                ├── .env                    # Файл с переменными окружения  
-                ├── requirements.txt        # Файл с необходимыми библиотеками  
-                ├── custom_classes.py       # Вспомогательные классы и модули  
-                ├── make_dataset.py         # Подготовка датасета  
-                ├── predict.py              # Предсказания модели  
-                ├── print_time.py           # Замер времени выполнения  
-                ├── set_all_seeds.py        # Установка сидов  
-                └── train.py                # Обучение модели  
+# 🗂️ Структура проекта
+
+```bash
+.
+├── 📄 README.md                    # Документация проекта
+├── 📁 data/                        # Данные
+│   ├── 📁 images/                  # Снимки для обучения и валидации
+│   └── 📁 test_png/                # Тестовые снимки для инференса
+├── 📁 docs/                        # Дополнительная документация
+├── 📁 models/                      # Модели машинного обучения
+│   └── ⚖️ best_model.ckpt          # Веса лучшей модели
+├── 📁 notebooks/                   # Jupyter ноутбуки
+│   └── 🔬 EDA.ipynb                # Exploratory Data Analysis
+├── 📁 reports/                     # Отчеты и результаты
+│   ├── 📁 experiment/              # Эксперименты
+│   │   └── 📁 version_0/           # Версия эксперимента
+│   │       ├── ⚙️ hparams.yaml     # Гиперпараметры
+│   │       └── 📊 metrics.csv      # Метрики обучения
+│   └── 📊 inference_results.csv    # Результаты инференса
+└── 📁 src/                         # Исходный код
+    ├── 🐍 __init__.py              # Пакетный файл
+    ├── 🔐 .env                     # Переменные окружения
+    ├── 📦 requirements.txt         # Зависимости проекта
+    ├── 🛠️ custom_classes.py        # Кастомные классы PyTorch
+    ├── 🗃️ make_dataset.py          # Препроцессинг данных
+    ├── 🔮 predict.py               # Скрипт предсказаний
+    ├── ⏱️ print_time.py            # Утилиты времени
+    ├── 🎲 set_all_seeds.py         # Фиксация случайных seed'ов
+    └── 🏋️ train.py                # Скрипт обучения модели
+``` 
  
 0. Установите пакеты: pip install -r requirements.txt
 

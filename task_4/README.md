@@ -2,31 +2,31 @@
 
 Структура проекта:
 .
-├── README.md      		# этот файл
-├── data
-│   ├── images     		# снимки для обучения и валидации
-│   ├── test_png   		# тестовые снимки для инференса модели
-├── docs           		# документация к датасету
-├── models         		# сохраненные модели
-│   └── best_model.ckpt		# веса модели
-├── notebooks
-│   └── EDA.ipynb  		# исследование датасета
-├── reports        		# отчеты обучения модели
-│   ├── experiment
-│   │   └── version_0
-│   │       ├── hparams.yaml
-│   │       └── metrics.csv
-│   └── inference_results.csv
-└── src                         # Модули для обучения и предсказания
-    ├── __init__.py
-    ├── .env                    # Файл с переменными окружения
-    ├── requirements.txt        # Файл с необходимыми библиотеками
-    ├── custom_classes.py       # Вспомогательные классы и модули
-    ├── make_dataset.py         # Подготовка датасета
-    ├── predict.py              # Предсказания модели
-    ├── print_time.py           # Замер времени выполнения
-    ├── set_all_seeds.py        # Установка сидов
-    └── train.py                # Обучение модели
+├── README.md      		# этот файл 
+├── data 
+│   ├── images     		# снимки для обучения и валидации 
+│   ├── test_png   		# тестовые снимки для инференса модели 
+├── docs           		# документация к датасету 
+├── models         		# сохраненные модели 
+│   └── best_model.ckpt		# веса модели 
+├── notebooks 
+│   └── EDA.ipynb  		# исследование датасета 
+├── reports        		# отчеты обучения модели 
+│   ├── experiment 
+│   │   └── version_0 
+│   │       ├── hparams.yaml 
+│   │       └── metrics.csv 
+│   └── inference_results.csv 
+└── src                         # Модули для обучения и предсказания 
+    ├── __init__.py 
+    ├── .env                    # Файл с переменными окружения 
+    ├── requirements.txt        # Файл с необходимыми библиотеками 
+    ├── custom_classes.py       # Вспомогательные классы и модули 
+    ├── make_dataset.py         # Подготовка датасета 
+    ├── predict.py              # Предсказания модели 
+    ├── print_time.py           # Замер времени выполнения 
+    ├── set_all_seeds.py        # Установка сидов 
+    └── train.py                # Обучение модели 
 
 0. Установите пакеты: pip install -r requirements.txt
 

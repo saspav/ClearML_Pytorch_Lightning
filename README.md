@@ -10,7 +10,7 @@
    - load_dataset - загрузить датасет из [репо](https://github.com/a-milenkin/ml_instruments/raw/refs/heads/main/data) 
    - inference_test - выполнить предсказания на всем тестовом датасете
    
-2. M22_train_lightning_signlang.py - решение [задачи](https://stepik.org/lesson/1466625/step/14?unit=1486236)
+3. M22_train_lightning_signlang.py - решение [задачи](https://stepik.org/lesson/1466625/step/14?unit=1486236)
    - зависимости: requirements_chapter_2.txt
    - пример запуска: python M22_train_lightning_signlang.py --fast_dev_run true --load_dataset true --inference_test true
    - fast_dev_run - выполнить Тестовый прогон

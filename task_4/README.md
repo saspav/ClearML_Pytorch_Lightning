@@ -29,7 +29,7 @@
     ├── 🔮 predict.py               # Скрипт предсказаний
     ├── ⏱️ print_time.py            # Утилиты времени
     ├── 🎲 set_all_seeds.py         # Фиксация случайных seed'ов
-    └── 🏋️ train.py                # Скрипт обучения модели
+    └── 🏋️ train.py                 # Скрипт обучения модели
 ``` 
  
 0. Установите пакеты: pip install -r requirements.txt

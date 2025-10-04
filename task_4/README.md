@@ -13,9 +13,9 @@
 │       └── EDA.ipynb  		# исследование датасета  
 ├── reports        		# отчеты обучения модели  
 │       ├── experiment  
-│       │   └── version_0  
-│       │       ├── hparams.yaml  
-│       │       └── metrics.csv  
+│       │           └── version_0  
+│       │                       ├── hparams.yaml  
+│       │                       └── metrics.csv  
 │       └── inference_results.csv  
 └── src                         # Модули для обучения и предсказания  
         ├── __init__.py  

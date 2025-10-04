@@ -38,7 +38,7 @@
 
 4. Обучаем модель: train.py 
 
-5. (Результат обучения)[https://app.clear.ml/projects/b5cfcf2792744731b06ee7aa3a3b1e65/experiments/8f3c61ba79614614ad93e57f01842d8b/output/execution]
+5. [Результат обучения](https://app.clear.ml/projects/b5cfcf2792744731b06ee7aa3a3b1e65/experiments/8f3c61ba79614614ad93e57f01842d8b/output/execution)
 
 6. Вместо обучения модели скачать веса: [https://www.kaggle.com/models/saspav/finetuned-model-itsomkvit-xray-v1]
 

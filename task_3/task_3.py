@@ -13,10 +13,11 @@ from dataclasses import dataclass
 import numpy as np
 import pandas as pd
 import torch
-from torch import nn
+import torchmetrics
 import torchvision.utils as vutils
 import torchvision.datasets as datasets
 import torchvision.transforms as transforms
+from torch import nn
 from torch.utils.data import DataLoader
 from torch.optim import Adam
 
@@ -265,6 +266,11 @@ class GAN(pl.LightningModule):
         # Логгер для ClearML
         self.log_clrml = Logger.current_logger()
 
+        # Добавьте метрики
+        self.val_f1 = torchmetrics.F1Score(task='multiclass', num_classes=10)
+        # Инициализация
+        self.val_f1.reset()
+
     def forward(self, z):
         """
         Прямой проход через генератор.
@@ -379,8 +385,33 @@ class GAN(pl.LightningModule):
                 image=pil_img
             )
 
+        # Предсказания дискриминатора для сгенерированных изображений
+        # и, возможно, для реальных, в зависимости от задачи
+        # Для примера возьмем предсказания дискриминатора на фиктивных данных
+        # Или вы можете принимать реальные метки из batch
+        real_images, labels = batch  # если есть метки реальных данных
+
+        # Расчет предсказаний
+        outputs = self.discriminator(real_images).view(-1)
+        # Предположим, что у вас есть истинные метки для реальных изображений
+        # и вы хотите оценить качество генерации, можно вычислить метрику
+        # иначе, если хотите метрику как качество генератора, можно использовать `labels`
+        # Для простоты возьмем метки из batch
+
+        # Обновляем метрики
+        self.val_f1.update(outputs, labels)
+
         # Логирование фиктивной метрики для Lightning (чтобы не было ошибок)
         self.log("valid_none", 0, prog_bar=False)
+
+    def on_validation_epoch_end(self):
+        """
+        Вызывается после завершения всех батчей валидации.
+        Здесь вычисляем и логируем F1 за эпоху.
+        """
+        f1_value = self.val_f1.compute()
+        self.log("valid_f1", f1_value, prog_bar=True, sync_dist=True)
+        self.val_f1.reset()
 
     def configure_optimizers(self):
         """
@@ -428,7 +459,7 @@ def run_training(cfg: CFG, datamodule: MNISTDataModule):
         dirpath=MODEL_DIR,
         filename="best_gan",
         save_top_k=1,
-        monitor="loss_G",  # метрика для раннего стопа
+        monitor="loss_D",  # метрика для раннего стопа
         mode="min",  # минимизируем метрику
         save_weights_only=True  # сохраняем только веса
     )
@@ -436,7 +467,7 @@ def run_training(cfg: CFG, datamodule: MNISTDataModule):
     # ранний стоп
     early_stopping_callback = EarlyStopping(
         patience=5,  # если не улучшается X эпох подряд — останавливаем
-        monitor="loss_G",
+        monitor="loss_D",
         mode="min",
         verbose=True
     )
@@ -482,6 +513,7 @@ def run_training(cfg: CFG, datamodule: MNISTDataModule):
 # ===================== Main =====================
 def parse_args():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--lr", type=float, help="Скорость обучения оптимизатора")
     parser.add_argument("--epoch", type=int, default=10, help="Количество эпох обучения")
     parser.add_argument("--debug_samples_epoch", type=int, default=1,
                         help="Частота логирования (1 - каждую эпоху, 2 - каждую вторую и ...)")
@@ -489,6 +521,10 @@ def parse_args():
 
 
 def check_clearml_env():
+    """
+    Установка переменных для clearml
+    :return:
+    """
     required_env_vars = [
         "CLEARML_WEB_HOST",
         "CLEARML_API_HOST",
@@ -496,30 +532,155 @@ def check_clearml_env():
         "CLEARML_API_ACCESS_KEY",
         "CLEARML_API_SECRET_KEY"
     ]
+
     env_vars = dict(CLEARML_WEB_HOST="https://app.clear.ml/",
                     CLEARML_API_HOST="https://api.clear.ml",
                     CLEARML_FILES_HOST="https://files.clear.ml"
                     )
 
+    def load_env_file(file_path):
+        """Загружает переменные из .env файла"""
+        try:
+            if not os.path.exists(file_path):
+                return False
+
+            print(f"📁 Загружаем переменные из файла: {file_path}")
+            with open(file_path, 'r', encoding='utf-8') as f:
+                for line in f:
+                    line = line.strip()
+                    # Пропускаем комментарии и пустые строки
+                    if not line or line.startswith('#') or '=' not in line:
+                        continue
+
+                    # Разделяем ключ и значение
+                    key, value = line.split('=', 1)
+                    key = key.strip()
+                    value = value.strip()
+
+                    # Удаляем кавычки если есть
+                    if (value.startswith('"') and value.endswith('"')) or \
+                            (value.startswith("'") and value.endswith("'")):
+                        value = value[1:-1]
+
+                    # Устанавливаем переменную, если она нужна и еще не установлена
+                    if key in required_env_vars and os.getenv(key) is None:
+                        os.environ[key] = value
+                        print(f"   ✅ Загружено: {key}")
+
+            return True
+        except Exception as e:
+            print(f"   ❌ Ошибка загрузки файла {file_path}: {e}")
+            return False
+
+    # Шаг 1: Пробуем загрузить из .env файлов
+    env_files = (".env", os.path.expanduser("~/.clearml.env"))
+
+    env_loaded = False
+    for env_file in env_files:
+        if load_env_file(env_file):
+            env_loaded = True
+            # После загрузки проверяем, все ли переменные установлены
+            missing_after_load = [var for var in required_env_vars if os.getenv(var) is None]
+            if not missing_after_load:
+                break  # Все переменные загружены, выходим из цикла
+
+    # Шаг 2: Устанавливаем значения по умолчанию для первых трех переменных
     for var in required_env_vars[:3]:
         if os.getenv(var) is None:
             os.environ[var] = env_vars[var]
+            print(f"⚙️  Установлено значение по умолчанию для {var}")
 
+    # Шаг 3: Проверяем отсутствующие переменные
     missing_vars = [var for var in required_env_vars if os.getenv(var) is None]
 
+    # Шаг 4: Запрашиваем у пользователя отсутствующие переменные
     if missing_vars:
         print("⚠️  Некоторые переменные среды ClearML отсутствуют.")
         for var in missing_vars:
-            os.environ[var] = getpass(f"Введите значение для {var}: ")
+            # Для секретных ключей используем getpass
+            if "SECRET" in var or "KEY" in var:
+                os.environ[var] = getpass(f"Введите значение для {var}: ")
+            else:
+                os.environ[var] = input(f"Введите значение для {var}: ")
         print("✅ Все переменные ClearML установлены.\n")
+    else:
+        if env_loaded:
+            print("✅ Все переменные ClearML загружены из .env файлов.\n")
+        else:
+            print("✅ Все переменные ClearML уже установлены в окружении.\n")
 
+    # Шаг 5: Сохраняем конфигурацию для будущего использования
+    try:
+        config_file = Path.home() / ".clearml.env"
+        with open(config_file, 'w', encoding='utf-8') as f:
+            f.write("# ClearML Configuration\n")
+            f.write(f"# Generated on: {__import__('datetime').datetime.now()}\n")
+            for var in required_env_vars:
+                value = os.getenv(var)
+                if value:
+                    f.write(f'{var}="{value}"\n')
+            f.write('CUBLAS_WORKSPACE_CONFIG=":4096:8"\n')
+        print(f"💾 Конфигурация сохранена в: {config_file}")
+    except Exception as e:
+        print(f"💡 Не удалось сохранить конфигурацию: {e}")
+
+    # Шаг 6: Устанавливаем CUBLAS переменную
     os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":4096:8"
 
+    # Шаг 7: Показываем итоговую конфигурацию (без секретов)
+    print("\n📋 Итоговая конфигурация ClearML:")
+    for var in required_env_vars:
+        value = os.getenv(var)
+        if value:
+            if "SECRET" in var or "KEY" in var:
+                masked_value = value[:4] + "****" + value[-4:] if len(value) > 8 else "****"
+                print(f"  {var}: {masked_value}")
+            else:
+                print(f"  {var}: {value}")
+    print(f"  CUBLAS_WORKSPACE_CONFIG: {os.getenv('CUBLAS_WORKSPACE_CONFIG')}")
 
-MODEL_DIR = Path("models")
-MODEL_DIR.mkdir(parents=True, exist_ok=True)
+
+# Дополнительная функция для проверки без интерактивного ввода
+def verify_clearml_env():
+    """
+    Проверяет конфигурацию ClearML без интерактивного ввода
+    """
+    required_env_vars = [
+        "CLEARML_WEB_HOST",
+        "CLEARML_API_HOST",
+        "CLEARML_FILES_HOST",
+        "CLEARML_API_ACCESS_KEY",
+        "CLEARML_API_SECRET_KEY"
+    ]
+
+    print("🔍 Проверка конфигурации ClearML...")
+    all_set = True
+
+    for var in required_env_vars:
+        value = os.getenv(var)
+        if not value:
+            print(f"❌ {var}: не установлена")
+            all_set = False
+        else:
+            if "SECRET" in var or "KEY" in var:
+                masked_value = value[:4] + "****" + value[-4:] if len(value) > 8 else "****"
+                print(f"✅ {var}: {masked_value}")
+            else:
+                print(f"✅ {var}: {value}")
+
+    if all_set:
+        print("🎉 Все переменные ClearML корректно настроены!")
+        return True
+    else:
+        print("💡 Запустите check_clearml_env() для настройки отсутствующих переменных")
+        return False
+
 
 if __name__ == "__main__":
+
+    MODEL_DIR = Path("models")
+    MODEL_DIR.mkdir(parents=True, exist_ok=True)
+
     args = parse_args()  # парсим аргументы
 
     check_clearml_env()  # читаем/устанавливаем переменные среды для clearml
